@@ -26,6 +26,12 @@ function requiredSetting(name) {
   return value.trim();
 }
 
+function importErrors(result) {
+  return Array.isArray(result.errors)
+    ? result.errors
+    : (result.errors ? [result.errors] : []);
+}
+
 async function importForAccount(bankName, accountSetting) {
   const payload = await readInput();
   let initialized = false;
@@ -61,18 +67,61 @@ async function importForAccount(bankName, accountSetting) {
       throw new Error(`Configured ${bankName} account is closed`);
     }
 
+    const importOptions = {
+      defaultCleared: false,
+      payeeNameNormalization: 'original',
+      reimportDeleted: false,
+    };
+    // Preview matches so the write pass can skip existing records entirely.
+    const inputIndexField = '__spain2actualInputIndex';
+    const preview = await actual.importTransactions(
+      account.id,
+      payload.transactions.map((transaction, index) => ({
+        ...transaction,
+        [inputIndexField]: index,
+      })),
+      { ...importOptions, dryRun: true }
+    );
+    const previewErrors = importErrors(preview);
+    if (previewErrors.length > 0) {
+      throw new Error(
+        `Actual rejected the import preview: ${JSON.stringify(previewErrors)}`
+      );
+    }
+    if (!Array.isArray(preview.updatedPreview)) {
+      throw new Error(
+        'Actual did not return duplicate-match details; refusing to import '
+        + 'to avoid modifying existing transactions'
+      );
+    }
+
+    const existingTransactionIndexes = new Set();
+    for (const match of preview.updatedPreview) {
+      const inputIndex = match.transaction?.[inputIndexField];
+      if (
+        !Number.isInteger(inputIndex)
+        || inputIndex < 0
+        || inputIndex >= payload.transactions.length
+      ) {
+        throw new Error(
+          'Could not identify a matched transaction in the Actual preview; '
+          + 'refusing to import to avoid modifying existing transactions'
+        );
+      }
+      existingTransactionIndexes.add(inputIndex);
+    }
+
+    const transactionsToImport = payload.transactions.map(
+      (transaction, index) => existingTransactionIndexes.has(index)
+        ? { ...transaction, skipTransaction: true }
+        : transaction
+    );
     const result = await actual.importTransactions(
       account.id,
-      payload.transactions,
-      {
-        defaultCleared: false,
-        payeeNameNormalization: 'original',
-        reimportDeleted: false,
-      }
+      transactionsToImport,
+      importOptions
     );
-    const errors = Array.isArray(result.errors)
-      ? result.errors
-      : (result.errors ? [result.errors] : []);
+    const errors = importErrors(result);
     if (errors.length > 0) {
       throw new Error(`Actual rejected the import: ${JSON.stringify(errors)}`);
     }
@@ -80,6 +129,7 @@ async function importForAccount(bankName, accountSetting) {
     process.stdout.write(JSON.stringify({
       added: result.added.length,
       updated: result.updated.length,
+      skipped: existingTransactionIndexes.size,
     }) + '\n');
   } finally {
     if (initialized) {
