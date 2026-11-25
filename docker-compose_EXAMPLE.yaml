@@ -32,8 +32,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '1'
+          memory: 256M
     volumes:
       - /path/to/your/input:/input
       - /path/to/your/output:/output
@@ -44,7 +44,6 @@ services:
     networks:
         lan:
             ipv4_address: 192.168.x.x
-            mac_address: "02:42:C0:xx:xx:xx"
     dns:
             - 8.8.8.8
 networks:
