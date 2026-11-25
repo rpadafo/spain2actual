@@ -1,8 +1,11 @@
 # Spain2Actual: Spain Banks Converter CSV and Import
 
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![AI-Generated Code](https://img.shields.io/badge/AI--Generated-Code-7B61FF?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/rpadafo/spain2actual/docker-publish.yml?branch=main&style=for-the-badge&logo=github)
+
+> **AI disclosure:** This project contains code generated with the assistance of artificial intelligence.
 
 Automated background service to convert Spanish bank statements into CSV files and optionally import Bankinter and Caixa transactions into **[Actual Budget](https://actualbudget.org/)**. Other supported formats continue to be exported as CSV for manual import.
 
