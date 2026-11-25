@@ -15,7 +15,6 @@ def load_traderepublic_transactions(csv_path):
         ("date", "name", "description", "amount_calc"),
         bank_name,
     )
-    transaction_id_column = available_columns.get("transaction_id")
     transactions = []
 
     for row_number, row in enumerate(rows, start=2):
@@ -23,11 +22,6 @@ def load_traderepublic_transactions(csv_path):
         amount_value = (row.get(columns["amount_calc"]) or "").strip()
         payee = (row.get(columns["name"]) or "").strip()
         notes = (row.get(columns["description"]) or "").strip()
-        transaction_id = (
-            (row.get(transaction_id_column) or "").strip()
-            if transaction_id_column
-            else ""
-        )
         if not date_value and not amount_value and not payee and not notes:
             continue
 
@@ -46,8 +40,6 @@ def load_traderepublic_transactions(csv_path):
             transaction["imported_payee"] = payee
         if notes:
             transaction["notes"] = notes
-        if transaction_id:
-            transaction["imported_id"] = transaction_id
         transactions.append(transaction)
 
     if not transactions:
