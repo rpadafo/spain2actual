@@ -120,7 +120,7 @@ def import_bankinter_csv(csv_path):
     required_settings = (
         "ACTUAL_PASSWORD",
         "ACTUAL_BUDGET_ID",
-        "ACTUAL_ACCOUNT_ID_BANKINTER",
+        "ACTUAL_ACCOUNT_NAME_BANKINTER",
     )
     missing_settings = [
         setting for setting in required_settings
@@ -133,7 +133,7 @@ def import_bankinter_csv(csv_path):
         )
 
     payload = {
-        "accountId": os.environ["ACTUAL_ACCOUNT_ID_BANKINTER"].strip(),
+        "accountName": os.environ["ACTUAL_ACCOUNT_NAME_BANKINTER"].strip(),
         "transactions": load_bankinter_transactions(csv_path),
     }
 

@@ -41,10 +41,18 @@ async function run() {
     await actual.downloadBudget(requiredSetting('ACTUAL_BUDGET_ID'));
 
     const accounts = await actual.getAccounts();
-    const account = accounts.find(item => item.id === payload.accountId);
-    if (!account) {
-      throw new Error('Configured Bankinter account was not found in the budget');
+    const accountName = payload.accountName.trim().toLowerCase();
+    const matchingAccounts = accounts.filter(
+      item => typeof item.name === 'string'
+        && item.name.trim().toLowerCase() === accountName
+    );
+    if (matchingAccounts.length === 0) {
+      throw new Error(`Bankinter account "${payload.accountName}" was not found`);
     }
+    if (matchingAccounts.length > 1) {
+      throw new Error(`Bankinter account name "${payload.accountName}" is ambiguous`);
+    }
+    const account = matchingAccounts[0];
     if (account.closed) {
       throw new Error('Configured Bankinter account is closed');
     }
