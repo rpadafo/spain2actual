@@ -4,18 +4,28 @@ services:
     container_name: spain2actual
     restart: unless-stopped
     environment:
+      #Importer settings >>
       RETENTION_HOUR: "12"
-      PREFIX_BANKINTER: BANK
-      PREFIX_CAIXA: CAIX
-      PREFIX_SABADELL: SABA
-      PREFIX_SANTANDER: SANT
-      PREFIX_TRADEREPUBLIC: TR
-      PREFIX_SUMUP: SUM
+      SYNC_API: true
+      #Actual Budget connector >>
       ACTUAL_SERVER_URL: "http://your-actual-host:5006"
       ACTUAL_PASSWORD: "your-actual-server-password"
-      ACTUAL_BUDGET_ID: "your-budget-sync-id"
-      ACTUAL_ACCOUNT_NAME_BANKINTER: "your-bankinter-account-name"
+      ACTUAL_SYNC_ID: "your-budget-sync-id"
       ACTUAL_DATA_DIR: /data
+      #Bankinter >>
+      PREFIX_BANKINTER: BANK
+      ACTUAL_ACCOUNT_NAME_BANKINTER: "your-bankinter-account-name"
+      #CaixaBankNow >>
+      PREFIX_CAIXA: CAIX
+      ACTUAL_ACCOUNT_NAME_CAIXA: "your-caixa-account-name"
+      #Sabadell >>
+      PREFIX_SABADELL: SABA
+      #Santander >>
+      PREFIX_SANTANDER: SANT
+      #Trade Republic >>
+      PREFIX_TRADEREPUBLIC: TR
+      #Sumup (Personal) >>
+      PREFIX_SUMUP: SUM
     deploy:
       resources:
         limits:
@@ -25,6 +35,7 @@ services:
       - /path/to/your/input:/input
       - /path/to/your/output:/output
       - /path/to/your/imported:/imported
+      - /path/to/your/error:/error
       - /path/to/your/actual-data:/data
 #Optional >>
     networks:
