@@ -22,6 +22,7 @@ services:
       PREFIX_SABADELL: SABA
       #Santander >>
       PREFIX_SANTANDER: SANT
+      ACTUAL_ACCOUNT_NAME_SANTANDER: "your-santander-account-name"
       #Trade Republic >>
       PREFIX_TRADEREPUBLIC: TR
       #Sumup (Personal) >>
