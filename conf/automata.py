@@ -7,10 +7,11 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 # Bank module >>
-import actual_importer
+import bankinter_importer
 import bankinter 
 import sabadell
 import caixa
+import caixa_importer
 import santander
 import traderepublic
 import sumup
@@ -82,7 +83,8 @@ class FilesMonitor(FileSystemEventHandler):
             
         file_name = os.path.basename(event.src_path)
         file_name_lower = file_name.lower()
-        bankinter_csv_path = None
+        import_csv_path = None
+        import_csv = None
 
         if file_name_lower.endswith(('.xlsx', '.xls', '.txt', '.csv', '.pdf')):
             logger.info(f"⚡ Find: {file_name}")
@@ -108,6 +110,12 @@ class FilesMonitor(FileSystemEventHandler):
                 elif file_name_lower.startswith("movimientos_cuenta"):
                     logger.info("-> Using [Caixa] module")
                     caixa.process(event.src_path,OUT_FOLDER,file_name)
+                    base_name = os.path.splitext(file_name)[0]
+                    prefix = os.environ.get("PREFIX_CAIXA", "CA")
+                    import_csv_path = os.path.join(
+                        OUT_FOLDER, f"{prefix}_{base_name}.csv"
+                    )
+                    import_csv = caixa_importer.import_caixa_csv
 
                 # 5. BANKINTER
                 elif file_name_lower.startswith("movimientos"):
@@ -115,9 +123,10 @@ class FilesMonitor(FileSystemEventHandler):
                     bankinter.process(event.src_path,OUT_FOLDER,file_name)
                     base_name = os.path.splitext(file_name)[0]
                     prefix = os.environ.get("PREFIX_BANKINTER", "BK")
-                    bankinter_csv_path = os.path.join(
+                    import_csv_path = os.path.join(
                         OUT_FOLDER, f"{prefix}_{base_name}.csv"
                     )
+                    import_csv = bankinter_importer.import_bankinter_csv
 
                 # 6. CASO SABADELL
                 elif file_name_lower.endswith('.txt') or re.match(r'^[\d_]+\.[a-zA-Z0-9]+$', file_name_lower):
@@ -138,14 +147,12 @@ class FilesMonitor(FileSystemEventHandler):
                 )
                 return
 
-            if bankinter_csv_path and SYNC_API_ENABLED:
+            if import_csv_path and import_csv and SYNC_API_ENABLED:
                 try:
-                    imported = actual_importer.import_bankinter_csv(
-                        bankinter_csv_path
-                    )
+                    imported = import_csv(import_csv_path)
                 except Exception as import_error:
                     try:
-                        move_to_folder(bankinter_csv_path, ERROR_FOLDER)
+                        move_to_folder(import_csv_path, ERROR_FOLDER)
                     except OSError as move_error:
                         logger.error(
                             "%s💥 Actual import failed for %s: %s. "
@@ -164,7 +171,7 @@ class FilesMonitor(FileSystemEventHandler):
 
                 if imported:
                     try:
-                        move_to_folder(bankinter_csv_path, IMPORTED_FOLDER)
+                        move_to_folder(import_csv_path, IMPORTED_FOLDER)
                     except OSError as move_error:
                         logger.error(
                             "%s💥 Actual import succeeded for %s, but the CSV "

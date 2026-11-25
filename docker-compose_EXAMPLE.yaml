@@ -17,6 +17,7 @@ services:
       ACTUAL_ACCOUNT_NAME_BANKINTER: "your-bankinter-account-name"
       #CaixaBankNow >>
       PREFIX_CAIXA: CAIX
+      ACTUAL_ACCOUNT_NAME_CAIXA: "your-caixa-account-name"
       #Sabadell >>
       PREFIX_SABADELL: SABA
       #Santander >>

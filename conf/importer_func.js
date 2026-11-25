@@ -20,13 +20,13 @@ function readInput() {
 
 function requiredSetting(name) {
   const value = process.env[name];
-  if (!value) {
+  if (!value || !value.trim()) {
     throw new Error(`Missing required setting ${name}`);
   }
-  return value;
+  return value.trim();
 }
 
-async function run() {
+async function importForAccount(bankName, accountSetting) {
   const payload = await readInput();
   let initialized = false;
 
@@ -41,20 +41,24 @@ async function run() {
     await actual.downloadBudget(requiredSetting('ACTUAL_SYNC_ID'));
 
     const accounts = await actual.getAccounts();
-    const accountName = payload.accountName.trim().toLowerCase();
+    const accountName = requiredSetting(accountSetting);
     const matchingAccounts = accounts.filter(
       item => typeof item.name === 'string'
-        && item.name.trim().toLowerCase() === accountName
+        && item.name.trim().toLowerCase() === accountName.toLowerCase()
     );
     if (matchingAccounts.length === 0) {
-      throw new Error(`Bankinter account "${payload.accountName}" was not found`);
+      throw new Error(
+        `Configured ${bankName} account "${accountName}" was not found`
+      );
     }
     if (matchingAccounts.length > 1) {
-      throw new Error(`Bankinter account name "${payload.accountName}" is ambiguous`);
+      throw new Error(
+        `Configured ${bankName} account "${accountName}" is ambiguous`
+      );
     }
     const account = matchingAccounts[0];
     if (account.closed) {
-      throw new Error('Configured Bankinter account is closed');
+      throw new Error(`Configured ${bankName} account is closed`);
     }
 
     const result = await actual.importTransactions(
@@ -84,7 +88,4 @@ async function run() {
   }
 }
 
-run().catch(error => {
-  console.error(`Actual Budget import failed: ${error.message}`);
-  process.exitCode = 1;
-});
+module.exports = { importForAccount };
