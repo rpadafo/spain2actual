@@ -13,7 +13,7 @@ Automated background service to convert Spanish bank statements into CSV files a
 > * An instance of **Actual Budget** running.
 > * **Docker** and **Docker Compose** installed.
 > * Dedicated host folders for `/input` (source documents), `/output` (generated CSV files), and `/imported` (successfully imported CSV files).
-> * The Actual server password, budget Sync ID, and Bankinter account ID to enable automatic imports.
+> * The Actual server password, budget Sync ID, and visible Bankinter account name to enable automatic imports.
 
 ---
 
@@ -59,7 +59,7 @@ services:
       ACTUAL_SERVER_URL: "http://your-actual-host:5006"
       ACTUAL_PASSWORD: "your-actual-server-password"
       ACTUAL_BUDGET_ID: "your-budget-sync-id"
-      ACTUAL_ACCOUNT_ID_BANKINTER: "your-bankinter-account-id"
+      ACTUAL_ACCOUNT_NAME_BANKINTER: "your-bankinter-account-name"
       ACTUAL_DATA_DIR: /data
     deploy:
       resources:
@@ -86,6 +86,6 @@ networks:
 
 ### Actual Budget API configuration
 
-Set the Actual connection values directly in the `environment` section of the Compose file you deploy, replacing the example values above. The server URL includes its port. `ACTUAL_PASSWORD` is the password used to log in to your Actual server. `ACTUAL_BUDGET_ID` is the budget's **Sync ID** from advanced settings. Set the account ID to the ID of the Bankinter account in that budget. If the password contains `$`, write it as `$$` so Compose passes it literally. Do not commit real passwords to a public repository.
+Set the Actual connection values directly in the `environment` section of the Compose file you deploy, replacing the example values above. The server URL includes its port. `ACTUAL_PASSWORD` is the password used to log in to your Actual server. `ACTUAL_BUDGET_ID` is the budget's **Sync ID** from advanced settings. Set `ACTUAL_ACCOUNT_NAME_BANKINTER` to the visible Bankinter account name in that budget; the lookup ignores case and surrounding spaces, and fails if the name is missing or ambiguous. If the password contains `$`, write it as `$$` so Compose passes it literally. Do not commit real passwords to a public repository.
 
 Bankinter imports use `Fecha contable` as the date, `Importe` as the signed amount, and `Descripción` as the payee; the balance column is ignored. Actual applies its import rules and duplicate reconciliation. When Actual is not configured, Bankinter CSVs remain in `/output` as before. When configured, a CSV moves to `/imported` only after a successful import; on an error, the source and generated CSV are kept for investigation. To retry, fix the configuration and submit the source file to `/input` again. `RETENTION_HOUR` controls cleanup in both CSV folders, which runs when a new input file is processed.
