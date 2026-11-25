@@ -21,9 +21,9 @@ def normalize_header(value):
     )
 
 
-def load_csv_rows(csv_path, bank_name):
+def load_csv_rows(csv_path, bank_name, delimiter=";"):
     with open(csv_path, "r", encoding="utf-8-sig", newline="") as csv_file:
-        reader = csv.DictReader(csv_file, delimiter=";")
+        reader = csv.DictReader(csv_file, delimiter=delimiter)
         if not reader.fieldnames:
             raise ValueError(f"{bank_name} CSV has no header row")
 

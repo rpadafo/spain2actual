@@ -15,6 +15,7 @@ import caixa_importer
 import santander
 import santander_importer
 import traderepublic
+import traderepublic_importer
 import sumup
 
 IN_FOLDER = "/input"
@@ -101,6 +102,12 @@ class FilesMonitor(FileSystemEventHandler):
                 elif file_name_lower == "exportación de transacción.csv":
                     logger.info("-> Using [Trade Republic] module")
                     traderepublic.process(event.src_path, OUT_FOLDER, file_name)
+                    base_name = os.path.splitext(file_name)[0]
+                    prefix = os.environ.get("PREFIX_TRADEREPUBLIC", "TR")
+                    import_csv_path = os.path.join(
+                        OUT_FOLDER, f"{prefix}_{base_name}.csv"
+                    )
+                    import_csv = traderepublic_importer.import_traderepublic_csv
 
                 # 3. SANTANDER (Files starts with transactions)
                 elif file_name_lower.startswith("transactions"):

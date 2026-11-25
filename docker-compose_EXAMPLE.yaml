@@ -25,6 +25,7 @@ services:
       ACTUAL_ACCOUNT_NAME_SANTANDER: "your-santander-account-name"
       #Trade Republic >>
       PREFIX_TRADEREPUBLIC: TR
+      ACTUAL_ACCOUNT_NAME_TRADEREPUBLIC: "your-trade-republic-account-name"
       #Sumup (Personal) >>
       PREFIX_SUMUP: SUM
     deploy:
