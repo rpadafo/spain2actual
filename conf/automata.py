@@ -17,6 +17,7 @@ import santander_importer
 import traderepublic
 import traderepublic_importer
 import sumup
+import sumup_importer
 
 IN_FOLDER = "/input"
 OUT_FOLDER = "/output"
@@ -97,6 +98,12 @@ class FilesMonitor(FileSystemEventHandler):
                 if file_name_lower.startswith("sumup") and file_name_lower.endswith(".pdf"):
                     logger.info("-> Using [SumUp] module")
                     sumup.process(event.src_path, OUT_FOLDER, file_name)
+                    base_name = os.path.splitext(file_name)[0]
+                    prefix = os.environ.get("PREFIX_SUMUP", "SUMUP")
+                    import_csv_path = os.path.join(
+                        OUT_FOLDER, f"{prefix}_{base_name}.csv"
+                    )
+                    import_csv = sumup_importer.import_sumup_csv
 
                 # 2. TRADE REPUBLIC
                 elif file_name_lower == "exportación de transacción.csv":

@@ -28,6 +28,7 @@ services:
       ACTUAL_ACCOUNT_NAME_TRADEREPUBLIC: "your-trade-republic-account-name"
       #Sumup (Personal) >>
       PREFIX_SUMUP: SUM
+      ACTUAL_ACCOUNT_NAME_SUMUP: "your-sumup-account-name"
     deploy:
       resources:
         limits:
