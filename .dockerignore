@@ -1,6 +1,8 @@
 docker-compose_EXAMPLE.yaml
 .git
 .github
+actual-data
+node_modules
 .gitignore
 README.md
 LICENCSE
