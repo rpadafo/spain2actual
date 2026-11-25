@@ -61,7 +61,7 @@ async function run() {
       account.id,
       payload.transactions,
       {
-        defaultCleared: true,
+        defaultCleared: false,
         payeeNameNormalization: 'original',
         reimportDeleted: false,
       }
