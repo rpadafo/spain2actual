@@ -1,8 +1,8 @@
-# Actual Budget: Spain Bank Converter CSV
+# Spain2Actual: Spain Banks Converter CSV and Import
 
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
-![Build Status](https://img.shields.io/github/actions/workflow/status/rpadafo/bank_documents_to_csv/docker-publish.yml?branch=main&style=for-the-badge&logo=github)
+![Build Status](https://img.shields.io/github/actions/workflow/status/rpadafo/spain2actual/docker-publish.yml?branch=main&style=for-the-badge&logo=github)
 
 Automated background service to convert Excel, TXT, and PDF statements from Spanish banks into CSV files, and to copy supported CSV exports unchanged, for seamless import into **[Actual Budget](https://actualbudget.org/)**.
 
@@ -42,9 +42,9 @@ Use the following `docker-compose.yml` snippet to deploy the container:
 
 ```yaml
 services:
-  actualbudget_spainbank_converter:
-    image: ghcr.io/rpadafo/actualbudget_spainbank_converter:latest
-    container_name: actualbudget-spainbank-converter
+  spain2actual:
+    image: ghcr.io/rpadafo/spain2actual:latest
+    container_name: spain2actual
     restart: unless-stopped
     environment:
       - RETENTION_HOUR=12 # Retention time in hours before auto-deleting CSV files

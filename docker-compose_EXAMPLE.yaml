@@ -1,7 +1,7 @@
 services:
-  actualbudget_spainbank_converter:
-    image: ghcr.io/rpadafo/actualbudget_spainbank_converter:latest
-    container_name: actualbudget-spainbank-converter
+  spain2actual:
+    image: ghcr.io/rpadafo/spain2actual:latest
+    container_name: spain2actual
     restart: unless-stopped
     environment:
       - RETENTION_HOUR=12 # Retention time in hours before auto-deleting CSV files
