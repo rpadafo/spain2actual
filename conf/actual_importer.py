@@ -113,12 +113,8 @@ def load_bankinter_transactions(csv_path):
 
 
 def import_bankinter_csv(csv_path):
-    server_url = os.environ.get("ACTUAL_SERVER_URL", "").strip()
-    if not server_url:
-        logger.info("Actual import is not configured; keeping the CSV in output")
-        return False
-
     required_settings = (
+        "ACTUAL_SERVER_URL",
         "ACTUAL_PASSWORD",
         "ACTUAL_SYNC_ID",
         "ACTUAL_ACCOUNT_NAME_BANKINTER",

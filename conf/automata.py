@@ -31,6 +31,11 @@ logger = logging.getLogger()
 ERROR_RED = "\033[1;31m"
 RESET_COLOR = "\033[0m"
 
+SYNC_API_VALUE = os.environ.get("SYNC_API", "false").strip().lower()
+if SYNC_API_VALUE not in ("true", "false"):
+    raise ValueError("SYNC_API must be set to 'true' or 'false'")
+SYNC_API_ENABLED = SYNC_API_VALUE == "true"
+
 def clean_old_csv(folder):
     now = time.time()
     limit_seconds = RETENTION_HOUR * 3600
@@ -133,7 +138,7 @@ class FilesMonitor(FileSystemEventHandler):
                 )
                 return
 
-            if bankinter_csv_path:
+            if bankinter_csv_path and SYNC_API_ENABLED:
                 try:
                     imported = actual_importer.import_bankinter_csv(
                         bankinter_csv_path
@@ -181,6 +186,10 @@ if __name__ == "__main__":
     logger.info(
         f"🤖 Watching {IN_FOLDER}; CSV output: {OUT_FOLDER}; imported files: "
         f"{IMPORTED_FOLDER}; failed imports: {ERROR_FOLDER}"
+    )
+    logger.info(
+        "Actual API sync: %s",
+        "enabled" if SYNC_API_ENABLED else "disabled"
     )
     
     try:

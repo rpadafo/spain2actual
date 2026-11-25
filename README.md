@@ -10,7 +10,7 @@ Automated background service to convert Spanish bank statements into CSV files a
 
 > [!IMPORTANT]
 > **Prerequisites:**
-> * An instance of **Actual Budget** running.
+> * An instance of **Actual Budget** running if `SYNC_API` is enabled.
 > * **Docker** and **Docker Compose** installed.
 > * Dedicated host folders for `/input` (source documents), `/output` (generated CSV files), `/imported` (successfully imported CSV files), and `/error` (CSV files whose Actual import failed).
 > * The Actual server password, budget Sync ID, and visible Bankinter account name to enable automatic imports.
@@ -21,7 +21,7 @@ Automated background service to convert Spanish bank statements into CSV files a
 
 * **Automated Processing:** Monitors the `/input` directory and converts files in real time.
 * **Smart Bank Detection:** Automatically routes files to the correct processor based on file names and structures.
-* **Bankinter Import:** Imports Bankinter transactions through Actual's official API client; successfully imported CSVs are moved to `/imported`.
+* **Optional Bankinter Import:** When `SYNC_API` is `true`, imports Bankinter transactions through Actual's official API client; successfully imported CSVs are moved to `/imported`.
 * **Failed Imports:** Moves Bankinter CSVs to `/error` if importing into Actual fails.
 * **Auto-Cleanup:** Deletes old CSVs in `/output` and `/imported` after a configurable retention period.
 * **Spanish Formatting Ready:** Properly formats dates, numbers (commas for decimals), and UTF-8 encoding.
@@ -52,6 +52,7 @@ services:
     environment:
       #Importer settings >>
       RETENTION_HOUR: "12"
+      SYNC_API: true
       #Actual Budget connector >>
       ACTUAL_SERVER_URL: "http://your-actual-host:5006"
       ACTUAL_PASSWORD: "your-actual-server-password"
@@ -96,6 +97,6 @@ networks:
 
 ### Actual Budget API configuration
 
-Set the Actual connection values directly in the `environment` section of the Compose file you deploy, replacing the example values above. The server URL includes its port. `ACTUAL_PASSWORD` is the password used to log in to your Actual server. `ACTUAL_SYNC_ID` is the budget's **Sync ID** from advanced settings. Set `ACTUAL_ACCOUNT_NAME_BANKINTER` to the visible Bankinter account name in that budget; the lookup ignores case and surrounding spaces, and fails if the name is missing or ambiguous. If the password contains `$`, write it as `$$` so Compose passes it literally. Do not commit real passwords to a public repository.
+Set `SYNC_API` to `"true"` to enable the Actual connection and Bankinter imports, or `"false"` to only convert files to CSV; it defaults to `"false"`. When enabled, set the other Actual connection values directly in the `environment` section of the Compose file you deploy, replacing the example values above. The server URL includes its port. `ACTUAL_PASSWORD` is the password used to log in to your Actual server. `ACTUAL_SYNC_ID` is the budget's **Sync ID** from advanced settings. Set `ACTUAL_ACCOUNT_NAME_BANKINTER` to the visible Bankinter account name in that budget; the lookup ignores case and surrounding spaces, and fails if the name is missing or ambiguous. If the password contains `$`, write it as `$$` so Compose passes it literally. Do not commit real passwords to a public repository.
 
-Bankinter imports map `Fecha contable` to the date, `Descripción` to both payee and notes, and `Importe` to the signed amount in cents; no category is sent and the balance column is ignored. Imported transactions default to uncleared. Actual applies its import rules and duplicate reconciliation, adding new transactions and updating existing ones only when the import data differs. After a successful conversion, the source file is removed from `/input`. When Actual is not configured, Bankinter CSVs remain in `/output`. When configured, a CSV moves from `/output` to `/imported` after a successful import, or to `/error` if the import fails. Failed-import CSVs are kept for investigation; to retry, submit the original source file to `/input` again. `RETENTION_HOUR` controls cleanup in `/output` and `/imported`, which runs when a new input file is processed; `/error` is retained for investigation.
+Bankinter imports map `Fecha contable` to the date, `Descripción` to both payee and notes, and `Importe` to the signed amount in cents; no category is sent and the balance column is ignored. Imported transactions default to uncleared. Actual applies its import rules and duplicate reconciliation, adding new transactions and updating existing ones only when the import data differs. After a successful conversion, the source file is removed from `/input`. With `SYNC_API=false`, all supported files are only converted and their CSVs remain in `/output`; no Actual connection is made. With `SYNC_API=true`, Bankinter CSVs move from `/output` to `/imported` after successful imports, or to `/error` if the import fails. Failed-import CSVs are kept for investigation; to retry, submit the original source file to `/input` again. `RETENTION_HOUR` controls cleanup in `/output` and `/imported`, which runs when a new input file is processed; `/error` is retained for investigation.
