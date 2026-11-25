@@ -13,6 +13,7 @@ import sabadell
 import caixa
 import caixa_importer
 import santander
+import santander_importer
 import traderepublic
 import sumup
 
@@ -105,6 +106,12 @@ class FilesMonitor(FileSystemEventHandler):
                 elif file_name_lower.startswith("transactions"):
                     logger.info("-> Using [Santander] module")
                     santander.process(event.src_path,OUT_FOLDER,file_name)
+                    base_name = os.path.splitext(file_name)[0]
+                    prefix = os.environ.get("PREFIX_SANTANDER", "SA")
+                    import_csv_path = os.path.join(
+                        OUT_FOLDER, f"{prefix}_{base_name}.csv"
+                    )
+                    import_csv = santander_importer.import_santander_csv
 
                 # 4. LA CAIXA
                 elif file_name_lower.startswith("movimientos_cuenta"):
