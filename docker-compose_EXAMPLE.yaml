@@ -1,24 +1,31 @@
 services:
-  actualbudget_spainbank_converter:
-    image: ghcr.io/rpadafo/actualbudget_spainbank_converter:latest
-    container_name: actualbudget-spainbank-converter
+  spain2actual:
+    image: ghcr.io/rpadafo/spain2actual:latest
+    container_name: spain2actual
     restart: unless-stopped
     environment:
-      - RETENTION_HOUR=12 # Retention time in hours before auto-deleting CSV files
-      - PREFIX_BANKINTER=BANK
-      - PREFIX_CAIXA=CAIX
-      - PREFIX_SABADELL=SABA
-      - PREFIX_SANTANDER=SANT
-      - PREFIX_TRADEREPUBLIC=TR
-      - PREFIX_SUMUP=SUM
+      RETENTION_HOUR: "12"
+      PREFIX_BANKINTER: BANK
+      PREFIX_CAIXA: CAIX
+      PREFIX_SABADELL: SABA
+      PREFIX_SANTANDER: SANT
+      PREFIX_TRADEREPUBLIC: TR
+      PREFIX_SUMUP: SUM
+      ACTUAL_SERVER_URL: "http://your-actual-host:5006"
+      ACTUAL_PASSWORD: "your-actual-server-password"
+      ACTUAL_BUDGET_ID: "your-budget-sync-id"
+      ACTUAL_ACCOUNT_ID_BANKINTER: "your-bankinter-account-id"
+      ACTUAL_DATA_DIR: /data
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: 100M
+          memory: 512M
     volumes:
       - /path/to/your/input:/input
       - /path/to/your/output:/output
+      - /path/to/your/imported:/imported
+      - /path/to/your/actual-data:/data
 #Optional >>
     networks:
         lan:
