@@ -103,6 +103,7 @@ def load_bankinter_transactions(csv_path):
             if payee:
                 transaction["payee_name"] = payee
                 transaction["imported_payee"] = payee
+                transaction["notes"] = payee
             transactions.append(transaction)
 
         if not transactions:
