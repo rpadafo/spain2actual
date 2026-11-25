@@ -18,6 +18,7 @@ import sumup
 IN_FOLDER = "/input"
 OUT_FOLDER = "/output"
 IMPORTED_FOLDER = "/imported"
+ERROR_FOLDER = "/error"
 RETENTION_HOUR = int(os.environ.get("RETENTION_HOUR", 12))
 
 logging.basicConfig(
@@ -52,19 +53,19 @@ def clean_old_csv(folder):
                      ERROR_RED, folder, error, RESET_COLOR)
 
 
-def move_to_imported(csv_path):
+def move_to_folder(csv_path, destination_folder):
     file_name = os.path.basename(csv_path)
     base_name, extension = os.path.splitext(file_name)
-    destination = os.path.join(IMPORTED_FOLDER, file_name)
+    destination = os.path.join(destination_folder, file_name)
     suffix = 1
     while os.path.exists(destination):
         destination = os.path.join(
-            IMPORTED_FOLDER, f"{base_name}_{suffix}{extension}"
+            destination_folder, f"{base_name}_{suffix}{extension}"
         )
         suffix += 1
 
     shutil.move(csv_path, destination)
-    logger.info("📥 Moved imported CSV to: %s", destination)
+    logger.info("📦 Moved CSV to: %s", destination)
 
 class FilesMonitor(FileSystemEventHandler):
     def on_created(self, event):
@@ -122,21 +123,56 @@ class FilesMonitor(FileSystemEventHandler):
                     logger.info(f"{ERROR_RED}❌ This file is not asociated to any bank: {file_name}{RESET_COLOR}")
                     return
 
-                if bankinter_csv_path and actual_importer.import_bankinter_csv(
-                    bankinter_csv_path
-                ):
-                    move_to_imported(bankinter_csv_path)
-
-                # Delete the original file from /input
+                # The input file is no longer needed once conversion succeeds.
                 os.remove(event.src_path)
 
             except Exception as e:
-                logger.info(f"{ERROR_RED}💥 Error processing {file_name}: {e}{RESET_COLOR}")
+                logger.error(
+                    "%s💥 Error converting %s: %s%s",
+                    ERROR_RED, file_name, e, RESET_COLOR
+                )
+                return
+
+            if bankinter_csv_path:
+                try:
+                    imported = actual_importer.import_bankinter_csv(
+                        bankinter_csv_path
+                    )
+                except Exception as import_error:
+                    try:
+                        move_to_folder(bankinter_csv_path, ERROR_FOLDER)
+                    except OSError as move_error:
+                        logger.error(
+                            "%s💥 Actual import failed for %s: %s. "
+                            "Could not move CSV to %s: %s%s",
+                            ERROR_RED, file_name, import_error, ERROR_FOLDER,
+                            move_error, RESET_COLOR
+                        )
+                    else:
+                        logger.error(
+                            "%s💥 Actual import failed for %s: %s. "
+                            "CSV moved to %s%s",
+                            ERROR_RED, file_name, import_error, ERROR_FOLDER,
+                            RESET_COLOR
+                        )
+                    return
+
+                if imported:
+                    try:
+                        move_to_folder(bankinter_csv_path, IMPORTED_FOLDER)
+                    except OSError as move_error:
+                        logger.error(
+                            "%s💥 Actual import succeeded for %s, but the CSV "
+                            "could not be moved to %s: %s%s",
+                            ERROR_RED, file_name, IMPORTED_FOLDER, move_error,
+                            RESET_COLOR
+                        )
 
 if __name__ == "__main__":
     os.makedirs(IN_FOLDER, exist_ok=True)
     os.makedirs(OUT_FOLDER, exist_ok=True)
     os.makedirs(IMPORTED_FOLDER, exist_ok=True)
+    os.makedirs(ERROR_FOLDER, exist_ok=True)
     
     observer = Observer()
     observer.schedule(FilesMonitor(), path=IN_FOLDER, recursive=False)
@@ -144,7 +180,7 @@ if __name__ == "__main__":
     logger.info("Starting the app")
     logger.info(
         f"🤖 Watching {IN_FOLDER}; CSV output: {OUT_FOLDER}; imported files: "
-        f"{IMPORTED_FOLDER}"
+        f"{IMPORTED_FOLDER}; failed imports: {ERROR_FOLDER}"
     )
     
     try:

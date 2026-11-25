@@ -13,7 +13,7 @@ services:
       PREFIX_SUMUP: SUM
       ACTUAL_SERVER_URL: "http://your-actual-host:5006"
       ACTUAL_PASSWORD: "your-actual-server-password"
-      ACTUAL_BUDGET_ID: "your-budget-sync-id"
+      ACTUAL_SYNC_ID: "your-budget-sync-id"
       ACTUAL_ACCOUNT_NAME_BANKINTER: "your-bankinter-account-name"
       ACTUAL_DATA_DIR: /data
     deploy:
@@ -25,6 +25,7 @@ services:
       - /path/to/your/input:/input
       - /path/to/your/output:/output
       - /path/to/your/imported:/imported
+      - /path/to/your/error:/error
       - /path/to/your/actual-data:/data
 #Optional >>
     networks:

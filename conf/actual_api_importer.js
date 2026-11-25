@@ -38,7 +38,7 @@ async function run() {
     });
     initialized = true;
 
-    await actual.downloadBudget(requiredSetting('ACTUAL_BUDGET_ID'));
+    await actual.downloadBudget(requiredSetting('ACTUAL_SYNC_ID'));
 
     const accounts = await actual.getAccounts();
     const accountName = payload.accountName.trim().toLowerCase();

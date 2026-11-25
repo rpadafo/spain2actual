@@ -120,7 +120,7 @@ def import_bankinter_csv(csv_path):
 
     required_settings = (
         "ACTUAL_PASSWORD",
-        "ACTUAL_BUDGET_ID",
+        "ACTUAL_SYNC_ID",
         "ACTUAL_ACCOUNT_NAME_BANKINTER",
     )
     missing_settings = [
