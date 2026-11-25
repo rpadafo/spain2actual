@@ -1,29 +1,49 @@
 services:
-  actualbudget_spainbank_converter:
-    image: ghcr.io/rpadafo/actualbudget_spainbank_converter:latest
-    container_name: actualbudget-spainbank-converter
+  spain2actual:
+    image: ghcr.io/rpadafo/spain2actual:latest
+    container_name: spain2actual
     restart: unless-stopped
     environment:
-      - RETENTION_HOUR=12 # Retention time in hours before auto-deleting CSV files
-      - PREFIX_BANKINTER=BANK
-      - PREFIX_CAIXA=CAIX
-      - PREFIX_SABADELL=SABA
-      - PREFIX_SANTANDER=SANT
-      - PREFIX_TRADEREPUBLIC=TR
-      - PREFIX_SUMUP=SUM
+      #Importer settings >>
+      RETENTION_HOUR: "12"
+      SYNC_API: true
+      #Actual Budget connector >>
+      ACTUAL_SERVER_URL: "http://your-actual-host:5006"
+      ACTUAL_PASSWORD: "your-actual-server-password"
+      ACTUAL_SYNC_ID: "your-budget-sync-id"
+      ACTUAL_DATA_DIR: /data
+      #Bankinter >>
+      PREFIX_BANKINTER: BANK
+      ACTUAL_ACCOUNT_NAME_BANKINTER: "your-bankinter-account-name"
+      #CaixaBankNow >>
+      PREFIX_CAIXA: CAIX
+      ACTUAL_ACCOUNT_NAME_CAIXA: "your-caixa-account-name"
+      #Sabadell >>
+      PREFIX_SABADELL: SABA
+      #Santander >>
+      PREFIX_SANTANDER: SANT
+      ACTUAL_ACCOUNT_NAME_SANTANDER: "your-santander-account-name"
+      #Trade Republic >>
+      PREFIX_TRADEREPUBLIC: TR
+      ACTUAL_ACCOUNT_NAME_TRADEREPUBLIC: "your-trade-republic-account-name"
+      #Sumup (Personal) >>
+      PREFIX_SUMUP: SUM
+      ACTUAL_ACCOUNT_NAME_SUMUP: "your-sumup-account-name"
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 100M
+          cpus: '1'
+          memory: 256M
     volumes:
       - /path/to/your/input:/input
       - /path/to/your/output:/output
+      - /path/to/your/imported:/imported
+      - /path/to/your/error:/error
+      - /path/to/your/actual-data:/data
 #Optional >>
     networks:
         lan:
             ipv4_address: 192.168.x.x
-            mac_address: "02:42:C0:xx:xx:xx"
     dns:
             - 8.8.8.8
 networks:
