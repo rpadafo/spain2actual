@@ -1,4 +1,4 @@
-# Spain2Actual: Spain Banks Converter CSV and Import
+# Spain2Actual: Spain Banks Converter CSV and Import to Actual Budget
 
 ![AI-Generated Code](https://img.shields.io/badge/AI--Generated-Code-7B61FF?style=for-the-badge)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
